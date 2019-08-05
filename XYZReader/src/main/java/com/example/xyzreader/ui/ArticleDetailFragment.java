@@ -10,12 +10,17 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
-
+import android.app.SharedElementCallback;
+import android.transition.Transition;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.ShareCompat;
@@ -28,6 +33,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -53,6 +59,7 @@ public class ArticleDetailFragment extends Fragment implements
     public static final String ARG_ITEM_ID = "item_id";
 
     private static final float PARALLAX_FACTOR = 1.25f;
+    private static final String position_key = "position";
 
 
 
@@ -83,6 +90,7 @@ public class ArticleDetailFragment extends Fragment implements
     private boolean mIsCard = false;
 
     private int mStatusBarFullOpacityBottom;
+    private int position;
 
 
 
@@ -112,11 +120,13 @@ public class ArticleDetailFragment extends Fragment implements
 
 
 
-    public static ArticleDetailFragment newInstance(long itemId) {
+    public static ArticleDetailFragment newInstance(long itemId, int position) {
 
         Bundle arguments = new Bundle();
 
         arguments.putLong(ARG_ITEM_ID, itemId);
+
+        arguments.putInt(position_key, position);
 
         ArticleDetailFragment fragment = new ArticleDetailFragment();
 
@@ -140,6 +150,10 @@ public class ArticleDetailFragment extends Fragment implements
 
             mItemId = getArguments().getLong(ARG_ITEM_ID);
 
+        }
+
+        if (getArguments().containsKey(position_key)){
+            position = getArguments().getInt(position_key);
         }
 
 
@@ -235,6 +249,11 @@ public class ArticleDetailFragment extends Fragment implements
 
 
         mPhotoView = (ImageView) mRootView.findViewById(R.id.photo);
+
+        //set a transition name for the image in the detail view
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ){
+            mPhotoView.setTransitionName(getString(R.string.transition_image)+ (position));
+        }
 
         mPhotoContainerView = mRootView.findViewById(R.id.photo_container);
 
@@ -440,6 +459,11 @@ public class ArticleDetailFragment extends Fragment implements
 
                         public void onResponse(ImageLoader.ImageContainer imageContainer, boolean b) {
 
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                                scheduleStartPostponedTransition(mPhotoView);
+
+                            }
+
                             Bitmap bitmap = imageContainer.getBitmap();
 
                             if (bitmap != null) {
@@ -472,6 +496,7 @@ public class ArticleDetailFragment extends Fragment implements
 
                     });
 
+
         } else {
 
             mRootView.setVisibility(View.GONE);
@@ -484,6 +509,23 @@ public class ArticleDetailFragment extends Fragment implements
 
         }
 
+    }
+    //Schedules the shared element transition to be started immediately
+    // after the shared element has been measured and laid out within the
+    // activity's view hierarchy.
+    //source 1
+    private void scheduleStartPostponedTransition(final View sharedElement) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            sharedElement.getViewTreeObserver().addOnPreDrawListener(
+                    new ViewTreeObserver.OnPreDrawListener() {
+                        @Override
+                        public boolean onPreDraw() {
+                            sharedElement.getViewTreeObserver().removeOnPreDrawListener(this);
+                            getActivity().startPostponedEnterTransition();
+                            return true;
+                        }
+                    });
+        }
     }
 
 
