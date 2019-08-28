@@ -18,8 +18,8 @@ In this project I redesigned an app to follow the Material Design guidelines and
 
 ## Screenshots
 
-![12](https://user-images.githubusercontent.com/35550711/63886989-21351780-c9b2-11e9-9b72-7afec211b8ce.png)
-![11](https://user-images.githubusercontent.com/35550711/63886944-ff3b9500-c9b1-11e9-87cf-d7c242c265fe.png)
+![12](https://user-images.githubusercontent.com/35550711/63895944-08832c80-c9c7-11e9-8c38-4afa5c75f4f4.png)
+![11](https://user-images.githubusercontent.com/35550711/63896039-56983000-c9c7-11e9-99d3-9547259417e6.png)
 
 ## License
 
